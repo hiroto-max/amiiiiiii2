@@ -26,20 +26,19 @@ export function ImprovedAmidakujiGameComponent() {
   const [path, setPath] = useState<{ x: number; y: number }[]>([])
 
   useEffect(() => {
-    // ... 既存のコード ...
-    generateHorizontalLines()
-  }, [lines])
+    generateHorizontalLines();
+  }, [generateHorizontalLines, lines]); 
 
   const generateHorizontalLines = useCallback(() => {
     const newHorizontalLines: boolean[][] = Array(lines * 3).fill(null).map(() => 
       Array(lines - 1).fill(false).map(() => Math.random() < 0.4)
-    )
-    setHorizontalLines(newHorizontalLines)
-  }, [lines])
+    );
+    setHorizontalLines(newHorizontalLines);
+  }, [lines]); // linesを依存配列に追加
   
   useEffect(() => {
-    generateHorizontalLines()
-  }, [generateHorizontalLines])
+    generateHorizontalLines();
+  }, [generateHorizontalLines]);
 
   const handleStartClick = (index: number) => {
     setSelectedStart(index)
