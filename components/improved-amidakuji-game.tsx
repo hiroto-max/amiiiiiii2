@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,15 +26,20 @@ export function ImprovedAmidakujiGameComponent() {
   const [path, setPath] = useState<{ x: number; y: number }[]>([])
 
   useEffect(() => {
+    // ... 既存のコード ...
     generateHorizontalLines()
   }, [lines])
 
-  const generateHorizontalLines = () => {
+  const generateHorizontalLines = useCallback(() => {
     const newHorizontalLines: boolean[][] = Array(lines * 3).fill(null).map(() => 
       Array(lines - 1).fill(false).map(() => Math.random() < 0.4)
     )
     setHorizontalLines(newHorizontalLines)
-  }
+  }, [lines])
+  
+  useEffect(() => {
+    generateHorizontalLines()
+  }, [generateHorizontalLines])
 
   const handleStartClick = (index: number) => {
     setSelectedStart(index)
@@ -44,7 +49,7 @@ export function ImprovedAmidakujiGameComponent() {
   }
 
   const calculatePath = (startIndex: number) => {
-    let path: { x: number; y: number }[] = [{ x: startIndex, y: 0 }]
+    const path: { x: number; y: number }[] = [{ x: startIndex, y: 0 }]
     let currentX = startIndex
 
     for (let y = 0; y < horizontalLines.length; y++) {
@@ -122,17 +127,24 @@ export function ImprovedAmidakujiGameComponent() {
               />
             ))}
             {path.length > 0 && (
-              <motion.div
-                className="absolute w-3 h-3 bg-blue-500 rounded-full"
-                initial={{ x: path[0].x * (100 / lines) + '%', y: 0 }}
-                animate={path.map((point, index) => ({
-                  x: point.x * (100 / lines) + '%',
-                  y: point.y * 20,
-                  transition: { delay: index * 0.2, duration: 0.2 }
-                }))}
-                onAnimationComplete={() => setAnimationComplete(true)}
-              />
-            )}
+  <motion.div
+    className="absolute w-3 h-3 bg-blue-500 rounded-full"
+    initial={{ x: path[0].x * (100 / lines) + '%', y: 0 }}
+    variants={{
+      animate: {
+        x: path[path.length - 1].x * (100 / lines) + '%',
+        y: path[path.length - 1].y * 20,
+        transition: {
+          duration: path.length * 0.2,
+          times: path.map((_, index) => index / (path.length - 1)),
+          ease: "linear",
+        }
+      }
+    }}
+    animate="animate"
+    onAnimationComplete={() => setAnimationComplete(true)}
+  />
+)}
           </div>
           <div className="flex justify-between items-center mt-4">
             {Array.from({ length: lines }).map((_, index) => (
